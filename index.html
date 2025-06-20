@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Tributária - Simples Nacional</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        /* ESTILOS DA "OUTRA CALCULADORA" APLICADOS AQUI */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f7f9;
+        }
+
+        main.calculadora-tributaria {
+            color: #000;
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 30px 40px;
+            max-width: 750px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+        }
+
+        h1.main-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            height: 45px;
+            padding: 10px 5px;
+            border: none;
+            font-size: 16px;
+            margin-top: 5px;
+            color: #555;
+            border-bottom: 2px solid #008EE5;
+            outline: none;
+            background-color: transparent;
+        }
+
+        .form-group input:read-only {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .row {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .row>.form-group {
+            width: 100%;
+        }
+
+        .action-button {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            background-color: #008EE5;
+            color: #fff;
+        }
+
+        .action-button:hover {
+            background-color: #0076bf;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-button:disabled {
+            background-color: #a0cff0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos do Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            text-align: center;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-content .title-modal {
+            font-size: 24px;
+            color: #333;
+            font-weight: bold;
+            margin-top: 0;
+        }
+
+        .modal-content .value-recover h1 {
+            font-size: 2.8em;
+            font-weight: 900;
+            color: #28a745;
+            margin: 20px 0;
+        }
+
+        .modal-content .modal-close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
+            color: #aaa;
+            border: none;
+            background: none;
+            cursor: pointer;
+        }
+
+        /* Estilo do Logo Uploader */
+        .logo-uploader {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-uploader:hover {
+            border-color: #008EE5;
+        }
+
+        .logo-image {
+            max-width: 150px;
+            max-height: 150px;
+            margin: auto;
+            display: block;
+        }
+
+        .logo-uploader .icon {
+            font-size: 50px;
+            color: #ccc;
+        }
+
+        /* Estilos do Select2 */
+        .select2-container--default .select2-selection--single {
+            height: 45px;
+            padding-top: 5px;
+            background-color: transparent;
+            border-radius: 0;
+            border: none;
+            border-bottom: 2px solid #008EE5;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 35px;
+            padding-left: 5px;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 43px;
+        }
+
+        .select2-dropdown {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #008EE5;
+            color: white;
+        }
+
+        /* Toast (Notificações) */
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #toast-container.error {
+            background-color: #dc3545;
+        }
+
+        #toast-container.info {
+            background-color: #0d6efd;
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="calculadora-tributaria">
+        <h1 class="main-title">Calculadora Tributária - Simples Nacional</h1>
+
+        <form id="calculator-form">
+            <div class="row">
+                <div class="form-group">
+                    <label for="cnpj">CNPJ <span id="cnpj-spinner" style="display: none;"><i
+                                class="fa-solid fa-spinner fa-spin"></i></span></label>
+                    <input type="text" id="cnpj" name="cnpj" maxlength="18" placeholder="00.000.000/0000-00">
+                </div>
+                <div class="form-group">
+                    <label for="razaoSocial">Razão Social</label>
+                    <input type="text" id="razaoSocial" name="razaoSocial" readonly>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="faturamento">Faturamento do Período</label>
+                <input type="text" id="faturamento" name="faturamento" placeholder="R$ 0,00">
+            </div>
+            <div class="form-group">
+                <label for="meses">Quantidade de Meses do Período</label>
+                <input type="number" id="meses" name="meses" placeholder="Ex: 12">
+            </div>
+            <div class="form-group">
+                <label for="segmento">Segmento da Empresa</label>
+                <select id="segmento" name="segmento" style="width: 100%;"></select>
+            </div>
+            <button type="submit" id="calculate-button" class="action-button">Calcular</button>
+        </form>
+    </main>
+
+    <div id="resultadoModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-button">&times;</button>
+            <h2 class="title-modal">Valor possível a Recuperar</h2>
+            <div class="value-recover">
+                <h1 id="valorRecuperarFormatado">R$ 0,00</h1>
+            </div>
+            <!-- <button id="abrirModalLogo" class="action-button">Baixar Contrato</button> -->
+        </div>
+    </div>
+
+    <div id="logoModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close-button">&times;</button>
+            <h2 class="title-modal">Adicionar logo da empresa</h2>
+            <div id="logoUploader" class="logo-uploader">
+                <img id="logoPreview" src="" alt="Prévia da Logo" class="logo-image" style="display: none;">
+                <div id="logoPlaceholder">
+                    <i class="fa-solid fa-image icon"></i>
+                    <p>Clique para enviar um PNG</p>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="image/png" style="display: none;">
+            <button id="baixarContratoFinal" class="action-button">Baixar Contrato com Logo</button>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
