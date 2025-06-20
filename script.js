@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO DAS APIs ---
-    const API_BASE_URL = 'http://195.35.40.120/api/v1';
+    const API_BASE_URL = 'https://195.35.40.120/api/v1';
     const API_CNPJ_URL = 'https://receitaws.com.br/v1/cnpj/';
 
     // --- SELEÇÃO DOS ELEMENTOS DO DOM ---
