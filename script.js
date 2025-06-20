@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO DAS APIs ---
-    const API_BASE_URL = 'http://195.35.40.120/api/v1';
+    const API_BASE_URL = 'https://api-qa.recuperatax.app.br/api/v1';
     const API_CNPJ_URL = 'https://receitaws.com.br/v1/cnpj/';
 
     // --- SELEÇÃO DOS ELEMENTOS DO DOM ---
@@ -23,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoPlaceholder = document.getElementById('logoPlaceholder');
     const toastContainer = document.getElementById('toast-container');
 
-    // --- ESTADO DA APLICAÇÃO E OPÇÕES ---
-    // (Nenhuma alteração nesta seção)
     let data = {
         cnpj: "", razaoSocial: "", faturamento: 0, meses: 0, segmento: "",
         segregacao: false, porcentagemMediaSegregacao: 0, teses: [], valorRBT12: 0,
@@ -40,21 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "mercados": "Mercados e Mercearias",
     };
 
-    // --- FUNÇÕES AUXILIARES ---
-    // (Nenhuma alteração nesta seção)
-    function showToast(message, type = 'error') { /* ... */ }
-    function populateSelect(selectElement, options) { /* ... */ }
-    function cnpjMask(value) { /* ... */ }
-    function formatCurrency(event) { /* ... */ }
 
-    // --- FUNÇÕES DE LÓGICA DE NEGÓCIO (API) ---
-    // (Nenhuma alteração nesta seção)
-    async function getCnpjData(cnpj) { /* ... */ }
-    async function performCalculation(calculatorData) { /* ... */ }
-    async function printPDF() { /* ... */ }
 
-    // CÓDIGO DAS FUNÇÕES SEM ALTERAÇÃO PARA ECONOMIZAR ESPAÇO
-    // (Copie as funções auxiliares e de API da resposta anterior)
     function showToast(message, type = 'error') { toastContainer.textContent = message; toastContainer.className = type; toastContainer.style.display = 'block'; setTimeout(() => { toastContainer.style.display = 'none'; }, 4000); }
     function populateSelect(selectElement, options) { if (!selectElement) return; selectElement.innerHTML = '<option value=""></option>'; for (const [value, label] of Object.entries(options)) { const option = document.createElement('option'); option.value = value; option.textContent = label; selectElement.appendChild(option); } }
     function cnpjMask(value) { if (!value) return ""; return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1/$2').replace(/(\d{4})(\d{1,2})/, '$1-$2').replace(/(-\d{2})\d+?$/, '$1'); }
@@ -63,17 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function performCalculation(calculatorData) { calculateButton.disabled = true; calculateButton.textContent = 'Calculando...'; try { const response = await fetch(`${API_BASE_URL}/calculadora-tributaria/simples-nacional`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(calculatorData) }); if (!response.ok) { const errorData = await response.json().catch(() => null); const errorMessage = errorData?.message || `Erro ${response.status}: Não foi possível calcular.`; throw new Error(errorMessage); } return await response.json(); } finally { calculateButton.disabled = false; calculateButton.textContent = 'Calcular'; } }
     async function printPDF() { showToast('Preparando seu arquivo, aguarde...', 'info'); baixarContratoFinalBtn.disabled = true; baixarContratoFinalBtn.textContent = 'Baixando...'; const body = { data: data, approvals: [], type: "calculadora-simples", logo: imageUrl }; try { const response = await fetch(`${API_BASE_URL}/calculadora-tributaria/pdf`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); if (!response.ok) throw new Error('Erro ao gerar o PDF.'); const blob = await response.blob(); const url = window.URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.setAttribute('download', 'Contrato de prestão de serviços - Diagnóstico Tributários.pdf'); document.body.appendChild(link); link.click(); document.body.removeChild(link); window.URL.revokeObjectURL(url); } catch (error) { console.error("Erro no download do PDF:", error); showToast(error.message, 'error'); } finally { baixarContratoFinalBtn.disabled = false; baixarContratoFinalBtn.textContent = 'Baixar Contrato com Logo'; } }
 
-    // --- EVENT LISTENERS ---
     cnpjInput.addEventListener('input', (e) => { e.target.value = cnpjMask(e.target.value); data.cnpj = e.target.value; if (e.target.value.length === 18) { getCnpjData(e.target.value); } });
     faturamentoInput.addEventListener('input', formatCurrency);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        // NOVO: Coleta de dados com jQuery por causa do Select2
         data.meses = Number($('#meses').val());
         data.segmento = $('#segmento').val();
 
-        // Validação
         if (!data.faturamento || data.faturamento <= 0) return showToast('Preencha o campo Faturamento');
         if (!data.meses || data.meses <= 0) return showToast('Preencha o campo Meses');
         if (!data.segmento) return showToast('Preencha o campo Segmento');
@@ -85,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const valorFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(response.valor_recuperar);
                 data.valorRecuperarFormatado = valorFormatado;
                 valorRecuperarFormatadoEl.textContent = valorFormatado;
-                resultadoModal.classList.add('active'); // CORRIGIDO: Usa classe para ativar modal
+                resultadoModal.classList.add('active');
             } else {
                 showToast('Não há valores a recuperar para este segmento.', 'info');
             }
@@ -93,12 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast(error.message, 'error');
         }
     });
-
-    // // CORRIGIDO: Event listeners para os modais
-    // abrirModalLogoBtn.addEventListener('click', () => {
-    //     resultadoModal.classList.remove('active');
-    //     logoModal.classList.add('active');
-    // });
 
     document.querySelectorAll('.modal-close-button').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -119,15 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     baixarContratoFinalBtn.addEventListener('click', printPDF);
 
-    // --- INICIALIZAÇÃO ---
     populateSelect(segmentoSelect, segmentoOptions);
 
-    // NOVO: Inicializa o Select2
     $(document).ready(function () {
         $('#segmento').select2({
             placeholder: "Selecione sua área de atuação",
             allowClear: true,
-            minimumResultsForSearch: Infinity // Esconde a caixa de busca
+            minimumResultsForSearch: Infinity
         });
     });
 });
