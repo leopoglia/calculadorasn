@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- CONFIGURAÇÃO DAS APIs ---
-    const API_BASE_URL = 'https://api-qa.recuperatax.app.br/api/v1';
+    const API_BASE_URL = 'https://api-prd.recuperatax.app.br/api/v1';
     const API_CNPJ_URL = 'https://receitaws.com.br/v1/cnpj/';
 
     // --- SELEÇÃO DOS ELEMENTOS DO DOM ---
